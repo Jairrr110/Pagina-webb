@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual de GNS3 - Laboratorio de Redes</title>
+  <link rel="stylesheet" href="A2.css">
+</head>
+<body>
+
+  <section id="pantalla-inicio" class="pantalla-completa">
+    <div class="caja-portada">
+      <span class="curso">Laboratorio de Redes</span>
+      <h1>Manual de GNS3</h1>
+      <p>Instalación, topología con routers c3725, enrutamiento OSPF y captura ICMP en Wireshark.</p>
+      <button type="button" id="btn-entrar">Entrar a la guía</button>
+    </div>
+  </section>
+
+  <section id="pantalla-carga" class="pantalla-completa oculto">
+    <div class="caja-carga">
+      <div class="circulo-carga"></div>
+      <p>Cargando contenido...</p>
+    </div>
+  </section>
+
+  <div id="contenido-manual" class="oculto">
+    
+    <header class="barra-superior">
+      <div class="barra-contenido">
+        <span class="logo-texto">GNS3 Guía</span>
+        <nav class="menu">
+          <a href="#instalacion">Instalación</a>
+          <a href="#topologia">Topología</a>
+          <a href="#ospf">OSPF</a>
+          <a href="#wireshark">Wireshark</a>
+          <a href="#biblioteca">Recursos</a>
+        </nav>
+        <button type="button" id="btn-salir" class="btn-secundario">Portada</button>
+      </div>
+    </header>
+
+    <main class="contenedor">
+      
+    
+      <section class="bloque-intro" id="arriba">
+        <h1>GNS3</h1>
+        <p class="resumen">
+          <strong>GNS3</strong> es un simulador y emulador de redes que permite diseñar, configurar y probar topologías virtuales o físicas desde una computadora, trabajando con imágenes reales de routers y análisis de paquetes.
+        </p>
+        <img src="imagenes/logo1.jpg" alt="Logo GNS3" class="imagen-guia">
+      </section>
+
+      <section class="tarjeta" id="instalacion">
+        <h2>1. Instalación del programa</h2>
+        <p>Primero ingresamos al navegador y descargamos el instalador desde la página oficial presionando <strong>Free download</strong>.</p>
+        <p>
+          Enlace oficial: 
+          <a href="https://www.gns3.com/" target="_blank" rel="noopener noreferrer">Descargar GNS3 aquí</a>
+        </p>
+      </section>
+
+      <section class="tarjeta" id="topologia">
+        <h2>2. Creación de topología y direccionamiento</h2>
+        <ul>
+          <li>Arrastramos dos routers modelo <strong>c3725</strong> al área de trabajo.</li>
+          <li>Renombramos el primer router como <strong>Router-HQ</strong> y el segundo como <strong>Router-BR</strong>.</li>
+          <li>Conectamos 2 switches junto a 2 máquinas virtuales (PC1 y PC2) mediante cableado Ethernet.</li>
+        </ul>
+        <img src="imagenes/configuracion1.jpg" alt="Topología inicial" class="imagen-guia">
+        <img src="imagenes/configuracion2.jpg" alt="Conexión de switches y PCs" class="imagen-guia">
+
+        <h3>Configuración de interfaces en Router-HQ</h3>
+        <p>Hacemos doble clic sobre el router para abrir la consola de comandos e ingresamos:</p>
+        <pre class="consola">enable
+configure terminal
+hostname Router-HQ
+interface FastEthernet 0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+exit
+interface FastEthernet 1/0
+ip address 10.1.12.1 255.255.255.252
+no shutdown</pre>
+        <img src="imagenes/configuracion3.jpg" alt="Configuración CLI Router-HQ" class="imagen-guia">
+
+        <h3>Asignación de IP en las PC virtuales</h3>
+        <pre class="consola">PC1: ip 192.168.3.2 255.255.255.0 192.168.3.1
+PC2: ip 192.168.2.2 255.255.255.0 192.168.2.1</pre>
+        <img src="imagenes/configuracion4.jpg" alt="IP en máquinas virtuales" class="imagen-guia">
+
+        <h3>Verificación inicial con ping</h3>
+        <pre class="consola">ping 192.168.3.2</pre>
+        <img src="imagenes/configuracion5.jpg" alt="Prueba de ping en PC1" class="imagen-guia">
+      </section>
+
+      <!-- Sección 3 -->
+      <section class="tarjeta" id="ospf">
+        <h2>3. Configuración de enrutamiento OSPF</h2>
+        <p>En la consola de <strong>Router-HQ</strong> activamos el protocolo OSPF y declaramos las redes conectadas:</p>
+        <pre class="consola">conf t
+router ospf 1
+router-id 1.1.1.1
+network 192.168.2.0 0.0.0.255 area 0
+network 10.1.12.0 0.0.0.3 area 0
+end
+write memory</pre>
+        <img src="imagenes/configuracion6.jpg" alt="Configuración OSPF" class="imagen-guia">
+
+        <p>Comprobamos la conectividad bidireccional entre redes usando origen específico:</p>
+        <pre class="consola">ping 192.168.2.1 source 192.168.3.1</pre>
+        <img src="imagenes/configuracion7.jpg" alt="Ping con origen" class="imagen-guia">
+      </section>
+
+      <section class="tarjeta" id="wireshark">
+        <h2>4. Análisis de tráfico con Wireshark</h2>
+        <p>Hacemos clic derecho sobre el enlace entre <strong>Router-HQ</strong> y <strong>Router-BR</strong>, iniciamos la captura y presionamos <strong>OK</strong>.</p>
+        <img src="imagenes/configuracion8.jpg" alt="Captura en enlace" class="imagen-guia">
+
+        <p>Filtramos por <strong>ICMP</strong> en Wireshark para aislar los paquetes de prueba:</p>
+        <img src="imagenes/configuracion9.jpg" alt="Filtro ICMP" class="imagen-guia">
+
+        <p>Desde <strong>PC1</strong> ejecutamos <code>ping 192.168.3.2</code> para verificar el tráfico de extremo a extremo:</p>
+        <img src="imagenes/configuracion10.jpg" alt="Ping extremo a extremo" class="imagen-guia">
+        <img src="imagenes/configuracion11.jpg" alt="Paquetes ICMP capturados" class="imagen-guia">
+
+        <p>Finalmente filtramos por <strong>OSPF</strong> para confirmar que los routers mantienen vecindad activa e intercambian rutas:</p>
+        <img src="imagenes/configuracion12.jpg" alt="Paquetes OSPF en Wireshark" class="imagen-guia">
+      </section>
+
+      <section class="tarjeta" id="biblioteca">
+        <h2>5. Biblioteca y recursos</h2>
+        <ul>
+          <li><a href="https://github.com/gns3" target="_blank" rel="noopener noreferrer">Repositorio oficial de GNS3 en GitHub</a> — Código fuente de <code>gns3-gui</code> y <code>gns3-server</code>.</li>
+          <li><a href="https://docs.gns3.com/docs-3.1-en/faq/contributing" target="_blank" rel="noopener noreferrer">Documentación oficial de GNS3</a> — Guías de GNS3 VM, plantillas y capturas.</li>
+          <li><a href="https://www.youtube.com/watch?v=-SslxE7QBz8" target="_blank" rel="noopener noreferrer">Curso GNS3 Episodio 3 (Escuela de Redes)</a> — Emulación de equipos en red.</li>
+          <li><a href="https://www.youtube.com/watch?v=dscfQpocgSg" target="_blank" rel="noopener noreferrer">GNS3 VM paso a paso (Escuela de Redes)</a> — Montaje de laboratorio virtual.</li>
+        </ul>
+      </section>
+
+      <footer class="pie">
+        <p>Alumno: Jair D'Alessandro Riva Baca</p>
+        <a href="#arriba">Subir &uarr;</a>
+      </footer>
+
+    </main>
+  </div>
+
+  <script src="A3.js"></script>
+</body>
+</html>
